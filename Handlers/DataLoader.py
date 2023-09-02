@@ -7,10 +7,12 @@ each file is a subject.
 """
 import glob
 import random
+import joblib
 
 import pandas as pd
 from darts import TimeSeries
 from darts.dataprocessing.transformers import Scaler
+
 from Consts import LABEL_COL, STATIC_COVARIANT_COLS, DYNAMIC_COVARIANT_COLS, TIME_COL
 
 
@@ -203,3 +205,26 @@ class DataLoader:
         df = df.fillna(0)
 
         return df
+
+    def save_split_data(self, train_label_ts: list[TimeSeries], train_cov_ts: list[TimeSeries],
+                        test_label_ts: list[TimeSeries], test_cov_ts: list[TimeSeries], base_path: str = "./Data",
+                        prefix_name: str = ""):
+        """
+        save the split data.
+        :param train_label_ts: list of darts time series representing the train labels.
+        :param train_cov_ts: list of darts time series representing the train covariances.
+        :param test_label_ts: list of darts time series representing the test labels.
+        :param test_cov_ts: list of darts time series representing the test covariances.
+        :param base_path: the base path to save the data.
+        :param prefix_name: the prefix name to add to the saved files.
+        :return: None
+        """
+        # save the train data
+        with open(f'{base_path}/train_label_ts_{prefix_name}.pkl', 'wb') as f:
+            joblib.dump(train_label_ts, f)
+        with open(f'{base_path}/train_cov_ts_{prefix_name}.pkl', 'wb') as f:
+            joblib.dump(train_cov_ts, f)
+        with open(f'{base_path}/test_label_ts_{prefix_name}.pkl', 'wb') as f:
+            joblib.dump(test_label_ts, f)
+        with open(f'{base_path}/test_cov_ts_{prefix_name}.pkl', 'wb') as f:
+            joblib.dump(test_cov_ts, f)
