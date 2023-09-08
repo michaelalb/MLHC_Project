@@ -155,9 +155,8 @@ class DataExplorer:
 
 if __name__ == '__main__':
     data_explorer = DataExplorer(Path('Data/full_data.parquet'))
-    # data_explorer.plot_feature_counts('../Figures/')
+    data_explorer.plot_feature_counts('../Figures/')
     data_explorer.plot_patient_gender_count_by_age('../Figures/')
-    # data_explorer.plot_feature_distributions_by_age_gender('../Figures/AgeGenderDists')
-    # data_explorer.plot_feature_distributions('../Figures/FeatureDists')
-    # data_explorer.plot_feature_distributions('../Figures/FeatureDists', type='hist')
-    print('a')
+    data_explorer.plot_feature_distributions_by_age_gender('../Figures/AgeGenderDists')
+    data_explorer.plot_feature_distributions('../Figures/FeatureDists')
+    data_explorer.plot_feature_distributions('../Figures/FeatureDists', type='hist')
