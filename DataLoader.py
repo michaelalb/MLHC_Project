@@ -7,6 +7,8 @@ each file is a subject.
 """
 import glob
 import random
+from typing import Tuple
+
 import joblib
 
 import pandas as pd
@@ -162,7 +164,7 @@ class DataLoader:
         files_1 = [i for i in glob.glob(f'{path_to_data}/training/*')]
         files_2 = [i for i in glob.glob(f'{path_to_data}/training_setB/*')]
         if max_amount_of_ts_to_load > 0:
-            file_list = files_1[:max_amount_of_ts_to_load//2] + files_2[:max_amount_of_ts_to_load//2]
+            file_list = files_1[:max_amount_of_ts_to_load // 2] + files_2[:max_amount_of_ts_to_load // 2]
         else:
             file_list = files_1 + files_2
         pos_ts, pos_cov_ts, neg_ts, neg_cov_ts = [], [], [], []
@@ -228,3 +230,23 @@ class DataLoader:
             joblib.dump(test_label_ts, f)
         with open(f'{base_path}/test_cov_ts_{prefix_name}.pkl', 'wb') as f:
             joblib.dump(test_cov_ts, f)
+
+    def load_split_data(self, base_path: str = "./Data", prefix_name: str = "") -> Tuple[
+        list[TimeSeries], list[TimeSeries], list[TimeSeries], list[TimeSeries]]:
+        """
+        load the split data.
+        :param base_path: the base path to load the data.
+        :param prefix_name: the prefix name to add to the loaded files.
+        :return: train_label_ts, train_cov_ts, test_label_ts, test_cov_ts
+        """
+        # load the train data
+        with open(f'{base_path}/train_label_ts_{prefix_name}.pkl', 'rb') as f:
+            train_label_ts = joblib.load(f)
+        with open(f'{base_path}/train_cov_ts_{prefix_name}.pkl', 'rb') as f:
+            train_cov_ts = joblib.load(f)
+        with open(f'{base_path}/test_label_ts_{prefix_name}.pkl', 'rb') as f:
+            test_label_ts = joblib.load(f)
+        with open(f'{base_path}/test_cov_ts_{prefix_name}.pkl', 'rb') as f:
+            test_cov_ts = joblib.load(f)
+
+        return train_label_ts, train_cov_ts, test_label_ts, test_cov_ts
