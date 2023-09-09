@@ -8,7 +8,7 @@ import seaborn as sns
 
 
 class DataExplorer:
-    def __init__(self, full_df_path: Union[str, Path]):
+    def __init__(self, full_df_path: Union[str, Path], should_show_plots: bool = False):
         self.full_df = pd.read_parquet(str(full_df_path))
         self.feature_cols = ['HR', 'O2Sat', 'Temp', 'SBP', 'MAP', 'DBP', 'Resp', 'EtCO2',
                              'BaseExcess', 'HCO3', 'FiO2', 'pH', 'PaCO2', 'SaO2', 'AST', 'BUN',
@@ -16,6 +16,7 @@ class DataExplorer:
                              'Glucose', 'Lactate', 'Magnesium', 'Phosphate', 'Potassium',
                              'Bilirubin_total', 'TroponinI', 'Hct', 'Hgb', 'PTT', 'WBC',
                              'Fibrinogen', 'Platelets']
+        self.should_show_plots = should_show_plots
 
     def plot_feature_distributions_by_age_gender(self, save_path: Union[str,Path]):
         """
@@ -43,7 +44,10 @@ class DataExplorer:
             plt.ylabel(column)
             plt.xticks(rotation=45)  # Rotate x-axis labels for readability
             plt.legend(title='Gender', labels=['Female (0)', 'Male (1)'])  # Customize legend labels
-            plt.savefig(str(save_path / f'{column}.jpeg'))
+            if self.should_show_plots:
+                plt.show()
+            else:
+                plt.savefig(str(save_path / f'{column}.jpeg'))
             plt.close()  # Close the current plot to release resources
 
         # Remove the 'AgeGroup' column to avoid altering the original DataFrame
@@ -76,7 +80,10 @@ class DataExplorer:
             else:
                 plt.ylabel('Count')
             plt.tight_layout()
-            plt.savefig(str(save_path_type / f'{column_name}.jpeg'))
+            if self.should_show_plots:
+                plt.show()
+            else:
+                plt.savefig(str(save_path_type / f'{column_name}.jpeg'))
 
     def plot_feature_counts(self, save_path: Union[str, Path]):
         """
@@ -104,7 +111,10 @@ class DataExplorer:
         plt.title(f'Average percent of non null values across features')
         plt.xlabel('Index of feature')
         plt.ylabel('Average percent of non null values')
-        plt.savefig(str(save_path / 'Non-null values per feature.jpeg'))
+        if self.should_show_plots:
+            plt.show()
+        else:
+            plt.savefig(str(save_path / 'Non-null values per feature.jpeg'))
 
     def plot_patient_gender_count_by_age(self, save_path: Union[str, Path]):
         """
@@ -146,8 +156,10 @@ class DataExplorer:
         plt.ylabel('Count')
         plt.xticks(rotation=45)  # Rotate x-axis labels for readability
         plt.legend(title='Gender', labels=['Female', 'Male', 'Total'])
-        plt.savefig(str(save_path / 'patient_gender_count_by_age.jpeg'))
-        plt.close()  # Close the current plot to release resources
+        if self.should_show_plots:
+            plt.show()
+        else:
+            plt.savefig(str(save_path / 'patient_gender_count_by_age.jpeg'))
 
         # Remove the 'AgeGroup' column to avoid altering the original DataFrame
         self.full_df.drop('AgeGroup', axis=1, inplace=True)
