@@ -44,10 +44,10 @@ def evaluate_results(results_file_path: Union[str, Path], results_output_path_ba
         results_df.to_csv(results_output_path_base + ".csv", index=False)
 
     # plot calibration curve
-    # plot_calibration_curve(results_df, results_output_path_base)
-    #
-    # # plot error and bias
-    # plot_result_errors_and_biases(results_df, results_output_path_base)
+    plot_calibration_curve(results_df, results_output_path_base)
+
+    # plot error and bias
+    plot_result_errors_and_biases(results_df, results_output_path_base)
 
     # plot feature importance and attention
     plot_attention(train_test_pkl_path=train_test_pkl_path,
