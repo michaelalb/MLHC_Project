@@ -181,6 +181,6 @@ def evaluate_model(model_name: str, train_test_data_pickle_file_name: str,
 if __name__ == '__main__':
     model_name = 'model_V3_CPU_2023_08_27_15_24_22.pt'
     evaluate_model(model_name=model_name,
-                   train_test_data_pickle_file_name="ffill_ts_train_test.pkl",
-                   evaluation_results_output_path=f"./ResultsEvaluation/{model_name}_ts_train_test_results.pkl")#,
-                   # results_file="./ffill_ts_train_test_results.pkl")
+                   train_test_data_pickle_file_name=f"{model_name}_ts_train_test.pkl",
+                   evaluation_results_output_path=f"./ResultsEvaluation/{model_name}_ts_train_test_results.pkl",
+                   results_file=f"./ResultsEvaluation/{model_name}_ts_train_test_results.pkl")

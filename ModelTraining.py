@@ -33,7 +33,7 @@ def run_training_loop(model_version=7):
                                 prefix_name=base_model_name)
 
     # define the model
-    input_chunk_length = 1
+    input_chunk_length = 10
     forecast_horizon = 1
     work_dir = './Models/'
     my_model = TFTModel(
