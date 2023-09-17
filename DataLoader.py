@@ -168,11 +168,25 @@ class DataLoader:
         else:
             file_list = files_1 + files_2
         pos_ts, pos_cov_ts, neg_ts, neg_cov_ts = [], [], [], []
-        is_positive = False
+        shortest = 10000
+        min_index = 10
+        removed_ts = 0
         for i, file in enumerate(file_list):
+            is_positive = False
             patient_df = pd.read_csv(file, delimiter='|')
+            if len(patient_df.index) < min_index:
+                removed_ts += 1
+                continue
             if patient_df[LABEL_COL].sum().sum() > 0:
                 is_positive = True
+                # cut the rest of the positive results
+                index_of_first_positive = patient_df[LABEL_COL].sum(axis=1).idxmax()
+                if index_of_first_positive > min_index:
+                    patient_df = patient_df.loc[:index_of_first_positive, :]
+                    shortest = min(shortest, len(patient_df.index))
+                else:
+                    print(f"lenght of positive example - already addimitted with sepsis {len(patient_df.index)} - first sepsis index {index_of_first_positive}")
+                    continue
             label_series, covariances_series = self.convert_df_data_to_time_series(patient_df, scaler)
             if is_positive:
                 pos_ts.append(label_series)

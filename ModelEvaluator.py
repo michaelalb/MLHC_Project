@@ -75,14 +75,32 @@ def create_results_dict(model: TorchForecastingModel, test_label_ts: list[TimeSe
         results = joblib.load(results_file)
         return results
     results = {}
+    from darts.explainability import tft_explainer
+    tmp_test_label = test_label_ts[11]
+    tmp_test_cov = test_cov_ts[11]
+    labels_ts, past_covs, true_labels, fut_covs = [], [], [], []
+    # predict
+    explainer = tft_explainer.TFTExplainer(model, background_series=tmp_test_label[:-7],
+                                           background_past_covariates=tmp_test_cov[:-7],
+                                           background_future_covariates=tmp_test_cov[-10 * 2:])
+    explainer_result = explainer.explain()
+    explainer.plot_variable_selection(explainer_result)
+    explainer.plot_attention(a, plot_type="time", )
+
     for ts_idx in range(len(test_label_ts)):
         tmp_test_label = test_label_ts[ts_idx]
         tmp_test_cov = test_cov_ts[ts_idx]
+        labels_ts, past_covs, true_labels, fut_covs = [], [], [], []
         # predict
-        labels_ts = [tmp_test_label[:-timestamp] for timestamp in range(1, len(tmp_test_label))]
-        past_covs = [tmp_test_cov[:-timestamp] for timestamp in range(1, len(tmp_test_label))]
-        fut_covs = [tmp_test_cov[-(timestamp + 1):] for timestamp in range(1, len(tmp_test_label))]
-        true_labels = [tmp_test_label[-timestamp] for timestamp in range(1, len(tmp_test_label))]
+        for i in range(5, len(tmp_test_label), 5):
+            labels_ts.append(tmp_test_label[:-i])
+            past_covs.append(tmp_test_cov[:-i])
+            fut_covs.append(tmp_test_cov[-i*2:])
+            true_labels.append(tmp_test_label[-i*2])
+        # labels_ts = [tmp_test_label[:-timestamp] for timestamp in range(1, len(tmp_test_label))]
+        # past_covs = [tmp_test_cov[:-timestamp] for timestamp in range(1, len(tmp_test_label))]
+        # fut_covs = [tmp_test_cov[-(timestamp + 1):] for timestamp in range(1, len(tmp_test_label))]
+        # true_labels = [tmp_test_label[-timestamp] for timestamp in range(1, len(tmp_test_label))]
         preds = model.predict(1, labels_ts, past_covariates=past_covs, future_covariates=fut_covs,
                               verbose=False)
         preds_proba = model.predict(1, labels_ts, past_covariates=past_covs, future_covariates=fut_covs,
@@ -179,8 +197,8 @@ def evaluate_model(model_name: str, train_test_data_pickle_file_name: str,
 
 
 if __name__ == '__main__':
-    model_name = 'model_V3_CPU_2023_08_27_15_24_22.pt'
+    model_name = "model_V11_horzion1_2023_09_12_20_47_57_CPU.pt" #'.pt'
     evaluate_model(model_name=model_name,
-                   train_test_data_pickle_file_name=f"{model_name}_ts_train_test.pkl",
-                   evaluation_results_output_path=f"./ResultsEvaluation/{model_name}_ts_train_test_results.pkl",
-                   results_file=f"./ResultsEvaluation/{model_name}_ts_train_test_results.pkl")
+                   train_test_data_pickle_file_name=f"ffill_ts_train_test.pkl",
+                   evaluation_results_output_path=f"./ResultsEvaluation/{model_name}_ts_train_test_results.pkl")#,
+                   # results_file=f"./ResultsEvaluation/{model_name}_ts_train_test_results.pkl")
