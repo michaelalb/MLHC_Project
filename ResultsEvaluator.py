@@ -1,26 +1,27 @@
-import os
 from pathlib import Path
 from typing import Union, Tuple
-import seaborn as sns
+
 import joblib
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from PIL import Image
 from darts import TimeSeries
 from darts.explainability import tft_explainer
 from darts.models import TFTModel
 from sklearn.calibration import calibration_curve
-import matplotlib.image as mpimg
-from PIL import Image
 
 
 def evaluate_results(results_file_path: Union[str, Path], results_output_path_base: str,
-                     train_test_pkl_path: str, model_name: str, results_df_read_path: str = None) -> None:
+                     train_test_pkl_path: str, model_name: str, results_df_read_path: str = None,
+                     should_show_plots: bool = False) -> None:
     """
     A function that evaluates the results of a model
     :param results_file_path: Path to a results pickle file - assumes structure created my ModelEvaluator functions
     :param results_output_path_base: Path to save results for analysis.
     :param results_df_read_path: If not None results will be read from here.
     :param train_test_pkl_path: Path to the train test pickle file
+    :param should_show_plots: If True, plots will be shown instead of saved
     :param model_name: The name of the model
     :return: None
     """
@@ -29,7 +30,7 @@ def evaluate_results(results_file_path: Union[str, Path], results_output_path_ba
     else:
         results = joblib.load(results_file_path)
         rows = [
-            {**v, 'ts_idx': ts_idx, 'timestamp_reversed': sub_index}
+            {**v, 'ts_idx': ts_idx, 'timestamp': sub_index}
             for ts_idx, sub_dict in results.items()
             for sub_index, v in sub_dict.items()
         ]
@@ -37,17 +38,14 @@ def evaluate_results(results_file_path: Union[str, Path], results_output_path_ba
         # Create a Pandas DataFrame from the list of rows and reverse the timestamps as they come reversed
         # from predictions
         results_df = pd.DataFrame(rows)
-        results_df['max_sub_index'] = results_df.groupby('ts_idx')['timestamp_reversed'].transform('max')
-        results_df['timestamp'] = results_df['max_sub_index'] - results_df['timestamp_reversed']
-        results_df.drop(columns=['max_sub_index'], inplace=True)
         results_df.sort_values(by=['ts_idx', 'timestamp'], inplace=True)
         results_df.to_csv(results_output_path_base + ".csv", index=False)
 
     # plot calibration curve
-    plot_calibration_curve(results_df, results_output_path_base)
+    plot_calibration_curve(results_df, results_output_path_base, should_show_plots)
 
     # plot error and bias
-    plot_result_errors_and_biases(results_df, results_output_path_base)
+    plot_result_errors_and_biases(results_df, results_output_path_base, should_show_plots)
 
     # plot feature importance and attention
     plot_attention(train_test_pkl_path=train_test_pkl_path,
@@ -140,7 +138,7 @@ def plot_calibration_curve(results_df: pd.DataFrame, save_path: str, should_show
 
     # Create the calibration curve plot
     plt.figure(figsize=(20, 10))
-    plt.plot(prob_pred, prob_true, marker='o', linestyle='--', color='blue', label='Calibration Curve')
+    plt.scatter(prob_pred, prob_true, color='blue', label='Calibration Curve')
     plt.plot([0, 1], [0, 1], linestyle='--', color='gray', label='Perfectly Calibrated')
     plt.xlabel('Mean Predicted Probability')
     plt.ylabel('Fraction of Positives')
